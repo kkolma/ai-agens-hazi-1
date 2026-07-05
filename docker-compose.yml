@@ -1,0 +1,26 @@
+# Plantbase — lokalis Postgres (a docs szerint OrbStack/Docker Desktop futtatja).
+# Ket szerep: 'plantbase' (owner, Prisma migracio+seed) es 'plantbase_ro' (read-only, runSql).
+services:
+  db:
+    image: postgres:16
+    container_name: plantbase-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: plantbase
+      POSTGRES_PASSWORD: plantbase
+      POSTGRES_DB: plantbase
+    ports:
+      # A hoszt 5432 gyakran foglalt (lokalis Postgres), ezert 5433-on nyitjuk.
+      - '5433:5432'
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      # Init-scriptek CSAK ures volume eseten futnak le (elso inditaskor).
+      - ./docker/initdb:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U plantbase -d plantbase']
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  pgdata:
