@@ -1,0 +1,14 @@
+{
+  "name": "@plantbase/cli",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "bin": {
+    "plantbase": "src/main.ts"
+  },
+  "scripts": {
+    "build": "tsc --noEmit -p tsconfig.json",
+    "serve": "tsx src/main.ts",
+    "lint": "eslint ."
+  }
+}

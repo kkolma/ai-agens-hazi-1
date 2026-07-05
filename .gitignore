@@ -3,3 +3,18 @@
 .env.*
 *.env
 !.env.example
+
+# Fuggosegek es build-kimenet
+node_modules/
+dist/
+coverage/
+
+# Nx cache
+.nx/cache
+.nx/workspace-data
+
+# Agent-naplok (futasidoben keletkeznek)
+logs/
+
+# OS / editor
+.DS_Store
