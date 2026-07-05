@@ -7,9 +7,12 @@ describe('buildSystemPrompt', () => {
     expect(buildSystemPrompt()).toContain('Plantbase asszisztens');
   });
 
-  it('states honestly that there is no database access (B2)', () => {
-    const prompt = buildSystemPrompt().toLowerCase();
-    expect(prompt).toContain('nincs adatbázis-hozzáférésed');
+  it('includes the products schema and SQL rules (B3)', () => {
+    const prompt = buildSystemPrompt();
+    expect(prompt).toContain('<schema>');
+    expect(prompt).toContain('products(');
+    expect(prompt).toContain('runSql');
+    expect(prompt).toContain('COALESCE(sale_price, price)');
   });
 
   it('uses XML-like structuring tags', () => {

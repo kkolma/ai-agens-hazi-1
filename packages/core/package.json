@@ -11,6 +11,10 @@
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.110.0",
+    "pg": "^8.22.0",
     "zod": "^3.25.76"
+  },
+  "devDependencies": {
+    "@types/pg": "^8.20.0"
   }
 }
