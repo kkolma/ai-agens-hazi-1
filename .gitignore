@@ -1,0 +1,5 @@
+# Titkokat tartalmazo fajlok - soha ne keruljenek gitbe
+.env
+.env.*
+*.env
+!.env.example
