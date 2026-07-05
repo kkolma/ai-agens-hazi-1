@@ -1,8 +1,15 @@
 // Plantbase CLI — belépési pont (commander).
-// A4: futtatható váz. Az `ask` és az interaktív mód VALÓDI viselkedése a B fázisokban jön:
-//   B1 = visszhang, B2 = LLM (DB nélkül), B3 = runSql tool.
+// B1: visszhang (echo) — LLM és adatbázis MÉG nincs. Az `ask` egyszeri echo,
+// a `chat` interaktív readline mód `exit`-ig. A logika a @plantbase/core-ban él.
+
+import { createInterface } from 'node:readline';
+import { stdin, stdout } from 'node:process';
 
 import { Command } from 'commander';
+
+import { echo } from '@plantbase/core';
+
+const toMessage = (err: unknown): string => (err instanceof Error ? err.message : 'ismeretlen hiba');
 
 const program = new Command();
 
@@ -13,19 +20,44 @@ program
 
 program
   .command('ask')
-  .description('Egyszeri kérdés a katalógusról (valódi válasz a B2 fázistól).')
-  .argument('<kerdes>', 'a természetes nyelvű kérdés')
+  .description('Egyszeri kérdés/visszhang (B1: echo).')
+  .argument('<kerdes>', 'a természetes nyelvű szöveg')
   .action((kerdes: string) => {
-    process.stdout.write(
-      `plantbase ask (A4 váz): a kérdésed „${kerdes}”. Az agent a B2 fázistól válaszol.\n`,
-    );
+    try {
+      stdout.write(`${echo(kerdes)}\n`);
+    } catch (err) {
+      stdout.write(`(hiba) ${toMessage(err)}\n`);
+      process.exitCode = 1;
+    }
   });
 
 program
   .command('chat', { isDefault: true })
-  .description('Interaktív mód (valódi visszhang a B1 fázistól).')
+  .description('Interaktív visszhang mód. Kilépés: exit')
   .action(() => {
-    process.stdout.write('plantbase interaktív mód (A4 váz). A B1 fázistól él.\n');
+    runInteractive();
   });
+
+function runInteractive(): void {
+  const rl = createInterface({ input: stdin, output: stdout, prompt: '> ' });
+  stdout.write('Plantbase interaktív visszhang (B1). Kilépés: exit\n');
+  rl.prompt();
+
+  rl.on('line', (line) => {
+    const trimmed = line.trim();
+    if (trimmed === 'exit') {
+      rl.close();
+      return;
+    }
+    try {
+      stdout.write(`${echo(trimmed)}\n`);
+    } catch (err) {
+      stdout.write(`(hiba) ${toMessage(err)}\n`);
+    }
+    rl.prompt();
+  }).on('close', () => {
+    stdout.write('Viszlát!\n');
+  });
+}
 
 program.parseAsync();

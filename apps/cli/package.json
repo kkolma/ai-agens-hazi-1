@@ -12,6 +12,7 @@
     "lint": "eslint ."
   },
   "dependencies": {
+    "@plantbase/core": "workspace:*",
     "commander": "^14.0.0"
   }
 }
