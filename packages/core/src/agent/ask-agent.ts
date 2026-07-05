@@ -6,9 +6,8 @@ import Anthropic from '@anthropic-ai/sdk';
 
 import { getAnthropicClient, MODEL } from '../anthropic/client';
 import { logInteraction } from '../logging/logger';
-import { runSql } from './run-sql';
 import { buildSystemPrompt } from './system-prompt';
-import { runSqlTool } from './tools';
+import { toolDefinitions, toolHandlers } from './tool-registry';
 
 const MAX_STEPS = 6; // biztonsági felső korlát a tool-loopra
 
@@ -51,7 +50,7 @@ export const askAgent = async (
       thinking: { type: 'disabled' },
       system: systemPrompt,
       messages,
-      tools: [runSqlTool],
+      tools: toolDefinitions,
     });
     inputTokens += response.usage.input_tokens;
     outputTokens += response.usage.output_tokens;
@@ -61,26 +60,34 @@ export const askAgent = async (
       const toolResults: Anthropic.ToolResultBlockParam[] = [];
 
       for (const block of response.content) {
-        if (block.type === 'tool_use' && block.name === 'runSql') {
-          const input = block.input as { sql?: unknown };
-          try {
-            const result = await runSql(String(input.sql ?? ''));
-            lastSql = result.sql;
-            lastRows = result.rows;
-            toolResults.push({
-              type: 'tool_result',
-              tool_use_id: block.id,
-              content: JSON.stringify(result.rows),
-            });
-          } catch (err) {
-            const message = err instanceof Error ? err.message : 'ismeretlen hiba';
-            toolResults.push({
-              type: 'tool_result',
-              tool_use_id: block.id,
-              content: `Hiba a lekérdezésben: ${message}`,
-              is_error: true,
-            });
-          }
+        if (block.type !== 'tool_use') continue;
+        const handler = toolHandlers[block.name];
+        if (!handler) {
+          toolResults.push({
+            type: 'tool_result',
+            tool_use_id: block.id,
+            content: `Ismeretlen tool: ${block.name}`,
+            is_error: true,
+          });
+          continue;
+        }
+        try {
+          const result = await handler.run(block.input);
+          lastSql = result.sql;
+          lastRows = result.rows;
+          toolResults.push({
+            type: 'tool_result',
+            tool_use_id: block.id,
+            content: JSON.stringify(result.rows),
+          });
+        } catch (err) {
+          const message = err instanceof Error ? err.message : 'ismeretlen hiba';
+          toolResults.push({
+            type: 'tool_result',
+            tool_use_id: block.id,
+            content: `Hiba a(z) ${block.name} toolban: ${message}`,
+            is_error: true,
+          });
         }
       }
 
