@@ -46,6 +46,18 @@ kérdés ──▶ LLM ──▶ „runSql: SELECT …" ──▶ [SELECT-only g
                               természetes nyelvű válasz 🌱
 ```
 
+### 🔧 Az agent tooljai
+
+A `runSql` (szabad SELECT, guarddal) mellett **dedikált, kézzel kódolt toolok** is vannak — ezekre az agent a
+system prompt tool-routingja alapján magától rátalál:
+
+| Tool | Mit csinál |
+|------|------------|
+| `listCategories` | Felsorolja az összes kategóriát (`SELECT DISTINCT category`). |
+| `listOnSale` | Az akciós növények, a legnagyobb megtakarítással előre. 💸 |
+| `survivalChampion` | A legnehezebben elpusztítható növény — amit akárhogy elhanyagolsz, túléli. 🪴💀 |
+| `runSql` | Minden egyéb adat-kérdés: az agent írja a SELECT-et. |
+
 ---
 
 ## 🏗️ Architektúra
@@ -161,6 +173,17 @@ Kb. 30 realisztikus növény, valós fajnevekkel. A mezők (röviden):
 ## 🔭 Mi jön még (a kurzus során)
 
 A v1 a katalógus felett dolgozik. A minta (LLM + tool + adat) viszont skálázódik: otthoni segéd → ecommerce → ügyfélszolgálat → logisztika. Később jöhet `apps/api`, `apps/web`, és az ajánlás-történet tárolása. Egyelőre viszont: kérdezz, és hagyd, hogy az agent SQL-ezzen helyetted.
+
+---
+
+## 📚 Dokumentáció
+
+- [`docs/roi.md`](docs/roi.md) — pénzbeli ROI egy 5 fős irodára (hard + soft + token-költség).
+- [`docs/system-prompt.md`](docs/system-prompt.md) — a system prompt javítása, indoklással (baseline → javított).
+- [`docs/plugins.md`](docs/plugins.md) — a használt pluginok / MCP-szerverek / skillek, indoklással.
+- [`docs/tech/`](docs/tech) — infra, architektúra, API (CLI + runSql tool).
+- [`docs/ddd/`](docs/ddd) — szójegyzék és domain-modell.
+- [`docs/brs-plantbase.md`](docs/brs-plantbase.md), [`stack.md`](docs/stack.md), [`konvenciok.md`](docs/konvenciok.md), [`dev-workflow.md`](docs/dev-workflow.md) — a kurzus-mellékletek.
 
 ---
 
